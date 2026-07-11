@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "Habit Tracker Pro",
+    "slug": "habit-tracker-pro",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0f1115",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.virajj.habittrackerpro"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0f1115",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "package": "com.virajj.habittrackerpro"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "9fd9ae11-4a1b-48bb-8c78-c8d533f2fee8"
+      }
+    }
+  }
+}
