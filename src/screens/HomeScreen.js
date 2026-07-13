@@ -4,9 +4,11 @@ import {
   RefreshControl, Alert, Platform, StatusBar
 } from 'react-native';
 import { Plus, Settings } from 'lucide-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getMe, getHabits, getHabitLogs, createHabitLog, deleteHabitLog, updateMe } from '../api';
 import HabitItem from '../components/HabitItem';
 import FrictionModal from '../components/FrictionModal';
+import UpcomingTasks from '../components/UpcomingTasks';
 
 export default function HomeScreen({ navigation }) {
   const [user, setUser] = useState(null);
@@ -19,6 +21,17 @@ export default function HomeScreen({ navigation }) {
 
   const loadData = useCallback(async () => {
     try {
+      // 1. Load cached habits first for instant UI response
+      try {
+        const cachedHabits = await AsyncStorage.getItem('cached_habits');
+        if (cachedHabits) {
+          setHabits(JSON.parse(cachedHabits));
+        }
+      } catch (e) {
+        console.error('Failed to load cached habits', e);
+      }
+
+      // 2. Fetch fresh data from API
       const [meRes, habitsRes, logsRes] = await Promise.all([
         getMe(),
         getHabits(),
@@ -28,6 +41,13 @@ export default function HomeScreen({ navigation }) {
       
       const loadedHabits = habitsRes.data || [];
       setHabits(loadedHabits);
+      
+      // Cache the fresh habits
+      try {
+        await AsyncStorage.setItem('cached_habits', JSON.stringify(loadedHabits));
+      } catch (e) {
+        console.error('Failed to save cached habits', e);
+      }
       
       // Schedule local notifications for these habits
       try {
@@ -246,6 +266,13 @@ export default function HomeScreen({ navigation }) {
             </Text>
           </View>
         </View>
+
+        {/* Time Sensitive Tasks */}
+        <UpcomingTasks 
+          habits={todaysTasks} 
+          completedIds={completedIds} 
+          onToggle={toggleTask} 
+        />
 
         {/* Today's Tasks */}
         <View className="bg-[#1a1d24] p-4 rounded-2xl border border-white/5 mb-4">

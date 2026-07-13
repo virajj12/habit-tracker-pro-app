@@ -18,7 +18,7 @@ function getDatesInRange(startDate, endDate) {
   return dates;
 }
 
-export default function Heatmap({ user, onTokensUpdated }) {
+export default function Heatmap({ user, onTokensUpdated, refreshTrigger }) {
   const [rangeOption, setRangeOption] = useState('month');
   const [habitLogs, setHabitLogs] = useState({});
   const [tokenDays, setTokenDays] = useState(new Set());
@@ -76,7 +76,7 @@ export default function Heatmap({ user, onTokensUpdated }) {
       }
     };
     fetchLogs();
-  }, [startDate, endDate]);
+  }, [startDate, endDate, refreshTrigger]);
 
   const handleBlockClick = (date, intensity, isTokenUsed) => {
     const today = new Date();

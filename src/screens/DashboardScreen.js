@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, ScrollView, SafeAreaView, RefreshControl, Platform, StatusBar } from 'react-native';
 import { BarChart } from 'react-native-gifted-charts';
 import { getAnalytics, getHistory, getMe } from '../api';
@@ -7,7 +7,7 @@ import Heatmap from '../components/Heatmap';
 
 const DISTRIBUTION_COLORS = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899'];
 
-export default function DashboardScreen() {
+export default function DashboardScreen({ navigation }) {
   const [user, setUser] = useState(null);
   const [stats, setStats] = useState({
     completionRate: 0,
@@ -19,7 +19,9 @@ export default function DashboardScreen() {
   const [history, setHistory] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
-  const loadData = async () => {
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const loadData = useCallback(async () => {
     try {
       const [analyticsRes, historyRes, meRes] = await Promise.all([
         getAnalytics(),
@@ -29,14 +31,22 @@ export default function DashboardScreen() {
       if (analyticsRes.success) setStats(analyticsRes.data);
       if (historyRes.success) setHistory(historyRes.data);
       if (meRes) setUser(meRes);
+      setRefreshTrigger(prev => prev + 1);
     } catch (e) {
       console.error(e);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      loadData();
+    });
+    return unsubscribe;
+  }, [navigation, loadData]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -62,6 +72,7 @@ export default function DashboardScreen() {
         {user && (
           <Heatmap 
             user={user} 
+            refreshTrigger={refreshTrigger}
             onTokensUpdated={(newTokens) => setUser({...user, streakTokens: newTokens})} 
           />
         )}
@@ -177,6 +188,9 @@ export default function DashboardScreen() {
             <Text className="text-gray-500 text-center py-4">No tasks completed yet. Go crush some habits! 💪</Text>
           )}
         </View>
+
+        {/* Spacer for bottom tab bar */}
+        <View className="h-24" />
       </ScrollView>
     </SafeAreaView>
   );

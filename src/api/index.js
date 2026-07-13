@@ -1,7 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 
-// Uses EXPO_PUBLIC_API_URL from .env if available.
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://your-deployed-backend-url.com';
+const BASE_URL = 'https://habit-tracker-pro-azure.vercel.app';
 
 export const apiClient = async (endpoint, options = {}) => {
   const token = await SecureStore.getItemAsync('auth_token');
@@ -33,6 +32,21 @@ export const apiClient = async (endpoint, options = {}) => {
 export const login = (email, password) => apiClient('/api/auth/login', {
   method: 'POST',
   body: JSON.stringify({ email, password }),
+});
+
+export const signup = (name, email, password) => apiClient('/api/auth/signup', {
+  method: 'POST',
+  body: JSON.stringify({ name, email, password }),
+});
+
+export const forgotPassword = (email) => apiClient('/api/auth/forgot-password', {
+  method: 'POST',
+  body: JSON.stringify({ email }),
+});
+
+export const resetPassword = (token, password) => apiClient('/api/auth/reset-password', {
+  method: 'POST',
+  body: JSON.stringify({ token, password }),
 });
 
 export const getMe = () => apiClient('/api/auth/me', {

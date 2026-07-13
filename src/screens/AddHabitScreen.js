@@ -4,6 +4,7 @@ import {
   ScrollView, ActivityIndicator, Alert, Platform, StatusBar
 } from 'react-native';
 import { ArrowLeft, Check } from 'lucide-react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { createHabit, updateHabit, getCategories, createCategory } from '../api';
 import { IconRenderer, ICON_MAP } from '../components/Icons';
 
@@ -27,13 +28,77 @@ export default function AddHabitScreen({ navigation, route }) {
   const [name, setName] = useState(editingHabit?.name || '');
   const [selectedIcon, setSelectedIcon] = useState(editingHabit?.icon || 'star');
   const [isDaily, setIsDaily] = useState(editingHabit?.dateRange?.isDaily ?? true);
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const initialStartDate = editingHabit?.dateRange?.startDate ? new Date(editingHabit.dateRange.startDate).toISOString().split('T')[0] : '';
+  const initialEndDate = editingHabit?.dateRange?.endDate ? new Date(editingHabit.dateRange.endDate).toISOString().split('T')[0] : '';
+  const [startDate, setStartDate] = useState(initialStartDate);
+  const [endDate, setEndDate] = useState(initialEndDate);
   const [skipDays, setSkipDays] = useState(editingHabit?.skipDays || []);
   const [timeOption, setTimeOption] = useState(editingHabit?.scheduledTime?.timeOption || 'any');
   const [fixedTime, setFixedTime] = useState(editingHabit?.scheduledTime?.fixedTime || '');
   const [timeRangeStart, setTimeRangeStart] = useState(editingHabit?.scheduledTime?.timeRangeStart || '');
   const [timeRangeEnd, setTimeRangeEnd] = useState(editingHabit?.scheduledTime?.timeRangeEnd || '');
+
+  // ─── Date/Time Picker State ─────────────────────────────────────
+  const [showPicker, setShowPicker] = useState(false);
+  const [pickerMode, setPickerMode] = useState('time');
+  const [activePickerField, setActivePickerField] = useState(null);
+  const [pickerDate, setPickerDate] = useState(new Date());
+
+  const parseTime = (timeStr) => {
+    if (!timeStr) return new Date();
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    const d = new Date();
+    d.setHours(hours || 0, minutes || 0, 0, 0);
+    return d;
+  };
+
+  const formatTime = (date) => {
+    if (!date) return '';
+    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+  };
+
+  const formatDate = (date) => {
+    if (!date) return '';
+    const y = date.getFullYear();
+    const m = (date.getMonth() + 1).toString().padStart(2, '0');
+    const d = date.getDate().toString().padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  };
+
+  const openPicker = (field, mode, currentDateStr) => {
+    let initialDate = new Date();
+    if (currentDateStr) {
+       if (mode === 'time') {
+           initialDate = parseTime(currentDateStr);
+       } else if (mode === 'date') {
+           const d = new Date(currentDateStr);
+           if (!isNaN(d)) initialDate = d;
+       }
+    }
+    setPickerDate(initialDate);
+    setPickerMode(mode);
+    setActivePickerField(field);
+    setShowPicker(true);
+  };
+
+  const handlePickerChange = (event, selectedDate) => {
+    if (Platform.OS === 'android') {
+      setShowPicker(false);
+    }
+    if (event.type === 'set' && selectedDate) {
+      setPickerDate(selectedDate);
+      if (pickerMode === 'time') {
+        const val = formatTime(selectedDate);
+        if (activePickerField === 'fixedTime') setFixedTime(val);
+        else if (activePickerField === 'timeRangeStart') setTimeRangeStart(val);
+        else if (activePickerField === 'timeRangeEnd') setTimeRangeEnd(val);
+      } else {
+        const val = formatDate(selectedDate);
+        if (activePickerField === 'startDate') setStartDate(val);
+        else if (activePickerField === 'endDate') setEndDate(val);
+      }
+    }
+  };
   const [selectedCategory, setSelectedCategory] = useState(editingHabit?.category || 'General');
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
   const [newCatName, setNewCatName] = useState('');
@@ -285,32 +350,35 @@ export default function AddHabitScreen({ navigation, route }) {
           </View>
 
           {timeOption === 'fixed' && (
-            <TextInput
-              value={fixedTime}
-              onChangeText={setFixedTime}
-              placeholder="e.g. 09:00"
-              placeholderTextColor="#6b7280"
-              className="bg-[#1a1d24] border border-white/10 rounded-xl px-4 py-3 text-white"
-            />
+            <TouchableOpacity
+              onPress={() => openPicker('fixedTime', 'time', fixedTime)}
+              className="bg-[#1a1d24] border border-white/10 rounded-xl px-4 py-3"
+            >
+              <Text className={fixedTime ? "text-white" : "text-gray-500"}>
+                {fixedTime || 'Select Time (e.g. 09:00)'}
+              </Text>
+            </TouchableOpacity>
           )}
 
           {timeOption === 'range' && (
             <View className="flex-row items-center gap-2">
-              <TextInput
-                value={timeRangeStart}
-                onChangeText={setTimeRangeStart}
-                placeholder="Start (09:00)"
-                placeholderTextColor="#6b7280"
-                className="flex-1 bg-[#1a1d24] border border-white/10 rounded-xl px-4 py-3 text-white"
-              />
+              <TouchableOpacity
+                onPress={() => openPicker('timeRangeStart', 'time', timeRangeStart)}
+                className="flex-1 bg-[#1a1d24] border border-white/10 rounded-xl px-4 py-3"
+              >
+                <Text className={timeRangeStart ? "text-white" : "text-gray-500"}>
+                  {timeRangeStart || 'Start Time'}
+                </Text>
+              </TouchableOpacity>
               <Text className="text-gray-500">to</Text>
-              <TextInput
-                value={timeRangeEnd}
-                onChangeText={setTimeRangeEnd}
-                placeholder="End (10:00)"
-                placeholderTextColor="#6b7280"
-                className="flex-1 bg-[#1a1d24] border border-white/10 rounded-xl px-4 py-3 text-white"
-              />
+              <TouchableOpacity
+                onPress={() => openPicker('timeRangeEnd', 'time', timeRangeEnd)}
+                className="flex-1 bg-[#1a1d24] border border-white/10 rounded-xl px-4 py-3"
+              >
+                <Text className={timeRangeEnd ? "text-white" : "text-gray-500"}>
+                  {timeRangeEnd || 'End Time'}
+                </Text>
+              </TouchableOpacity>
             </View>
           )}
         </View>
@@ -334,6 +402,28 @@ export default function AddHabitScreen({ navigation, route }) {
               </TouchableOpacity>
             </View>
           </View>
+          
+          {!isDaily && (
+            <View className="flex-row items-center gap-2 mt-2">
+              <TouchableOpacity
+                onPress={() => openPicker('startDate', 'date', startDate)}
+                className="flex-1 bg-[#1a1d24] border border-white/10 rounded-xl px-4 py-3"
+              >
+                <Text className={startDate ? "text-white" : "text-gray-500"}>
+                  {startDate || 'Start Date'}
+                </Text>
+              </TouchableOpacity>
+              <Text className="text-gray-500">to</Text>
+              <TouchableOpacity
+                onPress={() => openPicker('endDate', 'date', endDate)}
+                className="flex-1 bg-[#1a1d24] border border-white/10 rounded-xl px-4 py-3"
+              >
+                <Text className={endDate ? "text-white" : "text-gray-500"}>
+                  {endDate || 'End Date (Optional)'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
         {/* Submit Button */}
@@ -354,6 +444,16 @@ export default function AddHabitScreen({ navigation, route }) {
           )}
         </TouchableOpacity>
       </ScrollView>
+
+      {showPicker && (
+        <DateTimePicker
+          value={pickerDate}
+          mode={pickerMode}
+          is24Hour={true}
+          display="default"
+          onChange={handlePickerChange}
+        />
+      )}
     </SafeAreaView>
   );
 }

@@ -217,6 +217,8 @@ All are SVG path-based icons rendered via `<IconRenderer iconName="..." classNam
 | react-native-linear-gradient | ^2.8.3 | Gradient effects |
 | expo-secure-store | ^57.0.0 | Secure token storage |
 | @react-navigation/* | ^7.x | Stack + Tab navigation |
+| @react-native-community/datetimepicker | latest | Native date and time selectors |
+| @react-native-async-storage/async-storage | latest | Offline data caching |
 
 ---
 
@@ -244,10 +246,11 @@ const data = await apiClient('/api/endpoint', { method, body });
 - `src/components/Icons.js` — Maps 13 icon keys to lucide-react-native components
 - `src/components/HabitItem.js` — Rich habit row: checkbox, icon, name, category badge, time, lock
 - `src/components/FrictionModal.js` — Negative habit friction: countdown + reflection
-- `src/screens/HomeScreen.js` — Full rewrite: logs-based completion, toggle API, skip days, FAB, friction
-- `src/screens/AddHabitScreen.js` — Full form: name, icon picker, category, skip days, schedule, date range
-- `src/screens/SettingsScreen.js` — Profile, XP/Level/Tokens stats, logout
+- `src/screens/HomeScreen.js` – Full rewrite: logs-based completion, toggle API, skip days, FAB, friction, and offline caching
+- `src/screens/AddHabitScreen.js` – Full form with native date/time pickers, category, skip days, and schedule
+- `src/screens/SettingsScreen.js` – Profile, XP/Level/Tokens stats, logout
 - `src/screens/DashboardScreen.js` — Improved with distribution bars, icons in history
+- `src/services/notifications.js` — Notification system with 30-minute advance timers for scheduled tasks
 - `App.js` — Tab icons, AddHabit + Settings stack screens, logout flow
 
 ### ❌ Phase 3+4 (Future)

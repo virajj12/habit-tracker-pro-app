@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { Check, Lock } from 'lucide-react-native';
+import { Check, Lock, Pencil, Trash2 } from 'lucide-react-native';
 import { IconRenderer } from './Icons';
 
 /**
@@ -104,6 +104,18 @@ export default function HabitItem({ habit, isCompleted, isLocked, onToggle, onEd
       {isNegative && !isCompleted && (
         <View className="bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-md">
           <Text className="text-[10px] text-red-400 font-bold">QUIT</Text>
+        </View>
+      )}
+
+      {/* Actions (Edit / Delete) */}
+      {!isCompleted && (
+        <View className="flex-row items-center ml-2">
+          <TouchableOpacity onPress={onEdit} className="p-2 bg-white/5 rounded-md mr-1.5 border border-white/5" activeOpacity={0.7}>
+            <Pencil size={14} color="#9ca3af" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={onDelete} className="p-2 bg-red-500/10 rounded-md border border-red-500/20" activeOpacity={0.7}>
+            <Trash2 size={14} color="#ef4444" />
+          </TouchableOpacity>
         </View>
       )}
     </TouchableOpacity>
