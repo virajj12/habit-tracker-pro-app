@@ -36,7 +36,7 @@ export async function requestPermissions() {
       name: 'Habit Reminders',
       description: 'Daily reminders for your habits',
       importance: Notifications.AndroidImportance.HIGH,
-      vibrationPattern: [0, 250, 250, 250],
+      vibrationPattern: [0, 1000, 500, 1000, 500, 1000],
       lightColor: '#ef4444',
       sound: 'default',
     });
