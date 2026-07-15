@@ -9,6 +9,8 @@ import { getMe, getHabits, getHabitLogs, createHabitLog, deleteHabitLog, updateM
 import HabitItem from '../components/HabitItem';
 import FrictionModal from '../components/FrictionModal';
 import UpcomingTasks from '../components/UpcomingTasks';
+import { Progress } from '../components/Progress';
+import LinearGradient from 'react-native-linear-gradient';
 
 export default function HomeScreen({ navigation }) {
   const [user, setUser] = useState(null);
@@ -220,12 +222,13 @@ export default function HomeScreen({ navigation }) {
   // ─── Render ────────────────────────────────────────────────────
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#0f1115', paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }}>
-      <ScrollView
-        className="flex-1 px-4 pt-4"
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#ef4444" />
-        }
-      >
+      <View className="flex-1 relative">
+        <ScrollView
+          className="flex-1 px-4 pt-4"
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#ef4444" />
+          }
+        >
         {/* RPG Gamification Header */}
         <View className="mb-6 flex-row justify-between items-end">
           <View className="flex-1 mr-4">
@@ -233,13 +236,10 @@ export default function HomeScreen({ navigation }) {
               Hello, {user?.name || 'Pioneer'}!
             </Text>
             <View className="flex-row items-center">
-              <View className="flex-1 h-3 bg-[#1a1d24] rounded-full overflow-hidden border border-white/5 mr-3">
-                <View
-                  className="h-full bg-red-500 rounded-full"
-                  style={{ width: `${progressPercent}%` }}
-                />
+              <View className="flex-1">
+                <Progress value={progressPercent} />
               </View>
-              <Text className="text-xs text-gray-400 font-medium">
+              <Text className="text-xs text-gray-300 font-medium ml-3">
                 Lvl {level} ({currentLevelXp}/{xpNextLevel})
               </Text>
             </View>
@@ -255,7 +255,7 @@ export default function HomeScreen({ navigation }) {
         </View>
 
         {/* Velocity Score */}
-        <View className="bg-[#1a1d24] p-4 rounded-2xl border border-white/5 shadow-lg mb-6 flex-row items-center">
+        <View className="bg-[#1a1d24] p-4 rounded-2xl border border-white/10 shadow-lg mb-6 flex-row items-center">
           <View className="w-12 h-12 rounded-full bg-blue-500/10 items-center justify-center border border-blue-500/20 mr-4">
             <Text className="text-blue-500 text-xl font-bold">⚡</Text>
           </View>
@@ -275,7 +275,7 @@ export default function HomeScreen({ navigation }) {
         />
 
         {/* Today's Tasks */}
-        <View className="bg-[#1a1d24] p-4 rounded-2xl border border-white/5 mb-4">
+        <View className="bg-[#1a1d24] p-4 rounded-2xl border border-white/10 mb-4">
           <Text className="text-lg font-bold text-white mb-4">Today's Tasks</Text>
 
           {todaysTasks.length === 0 ? (
@@ -299,8 +299,8 @@ export default function HomeScreen({ navigation }) {
 
         {/* Rest of Tasks (skipped today) */}
         {restOfTasks.length > 0 && (
-          <View className="bg-[#1a1d24]/50 p-4 rounded-2xl border border-white/5 mb-6 opacity-60">
-            <Text className="text-lg font-semibold text-gray-400 mb-4">Rest of the Tasks</Text>
+          <View className="bg-[#1a1d24]/50 p-4 rounded-2xl border border-white/10 mb-6 opacity-80">
+            <Text className="text-lg font-semibold text-gray-300 mb-4">Rest of the Tasks</Text>
             {restOfTasks.map(habit => (
               <HabitItem
                 key={habit._id}
@@ -318,6 +318,21 @@ export default function HomeScreen({ navigation }) {
         {/* Spacer for FAB */}
         <View className="h-20" />
       </ScrollView>
+
+      {/* Top Fade Gradient for HomeScreen ScrollView */}
+      <LinearGradient
+        colors={['#0f1115', 'rgba(15,17,21,0)']}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 24, zIndex: 5 }}
+        pointerEvents="none"
+      />
+
+      {/* Bottom Fade Gradient for HomeScreen ScrollView */}
+      <LinearGradient
+        colors={['rgba(15,17,21,0)', '#0f1115']}
+        style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, zIndex: 5 }}
+        pointerEvents="none"
+      />
+      </View>
 
       {/* Floating Add Button */}
       <TouchableOpacity

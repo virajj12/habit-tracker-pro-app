@@ -7,6 +7,8 @@ import { ArrowLeft, Check } from 'lucide-react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { createHabit, updateHabit, getCategories, createCategory } from '../api';
 import { IconRenderer, ICON_MAP } from '../components/Icons';
+import { Alert as UIAlert, AlertTitle, AlertDescription } from '../components/Alert';
+import { CheckCircle2 } from 'lucide-react-native';
 
 const DAYS_OF_WEEK = [
   { label: 'S', value: 'Sun' },
@@ -25,6 +27,7 @@ export default function AddHabitScreen({ navigation, route }) {
   const isEditing = !!editingHabit;
 
   // ─── Form State ──────────────────────────────────────────────────
+  const [showSuccess, setShowSuccess] = useState(false);
   const [name, setName] = useState(editingHabit?.name || '');
   const [selectedIcon, setSelectedIcon] = useState(editingHabit?.icon || 'star');
   const [isDaily, setIsDaily] = useState(editingHabit?.dateRange?.isDaily ?? true);
@@ -183,7 +186,14 @@ export default function AddHabitScreen({ navigation, route }) {
       } else {
         await createHabit(payload);
       }
-      navigation.goBack();
+      
+      // Show custom UI Alert
+      setShowSuccess(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+        navigation.goBack();
+      }, 1500);
+
     } catch (err) {
       Alert.alert('Error', err.message || 'Failed to save habit.');
     } finally {
@@ -208,21 +218,34 @@ export default function AddHabitScreen({ navigation, route }) {
       </View>
 
       <ScrollView className="flex-1 px-4" keyboardShouldPersistTaps="handled">
+        {/* Success Alert */}
+        {showSuccess && (
+          <View className="mt-4">
+            <UIAlert>
+              <CheckCircle2 size={20} color="#16a34a" />
+              <AlertTitle>{isEditing ? 'Task updated successfully' : 'Task added successfully'}</AlertTitle>
+              <AlertDescription>
+                {isEditing ? 'Your changes have been saved.' : 'Your new task has been saved to your habit tracker.'}
+              </AlertDescription>
+            </UIAlert>
+          </View>
+        )}
+
         {/* Task Name */}
         <View className="mt-4 mb-5">
-          <Text className="text-gray-400 text-sm mb-1.5">Task Name</Text>
+          <Text className="text-gray-300 text-sm mb-1.5">Task Name</Text>
           <TextInput
             value={name}
             onChangeText={setName}
             placeholder="e.g. Read 10 pages"
-            placeholderTextColor="#4b5563"
+            placeholderTextColor="#6b7280"
             className="bg-[#1a1d24] border border-white/10 rounded-xl px-4 py-3 text-white text-base"
           />
         </View>
 
         {/* Icon Selector */}
         <View className="mb-5">
-          <Text className="text-gray-400 text-sm mb-1.5">Icon</Text>
+          <Text className="text-gray-300 text-sm mb-1.5">Icon</Text>
           <View className="flex-row flex-wrap gap-2">
             {Object.keys(ICON_MAP).map((iconName) => (
               <TouchableOpacity
@@ -246,7 +269,7 @@ export default function AddHabitScreen({ navigation, route }) {
 
         {/* Category */}
         <View className="mb-5">
-          <Text className="text-gray-400 text-sm mb-1.5">Category</Text>
+          <Text className="text-gray-300 text-sm mb-1.5">Category</Text>
           {!showNewCat ? (
             <>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -297,8 +320,8 @@ export default function AddHabitScreen({ navigation, route }) {
 
         {/* Skip Days */}
         <View className="mb-5">
-          <Text className="text-gray-400 text-sm mb-1.5">
-            Skip Days <Text className="text-gray-600 text-xs">(Optional)</Text>
+          <Text className="text-gray-300 text-sm mb-1.5">
+            Skip Days <Text className="text-gray-500 text-xs">(Optional)</Text>
           </Text>
           <View className="flex-row justify-between">
             {DAYS_OF_WEEK.map((day) => {
@@ -324,8 +347,8 @@ export default function AddHabitScreen({ navigation, route }) {
 
         {/* Schedule */}
         <View className="mb-5">
-          <Text className="text-gray-400 text-sm mb-1.5">
-            Schedule <Text className="text-gray-600 text-xs">(Optional)</Text>
+          <Text className="text-gray-300 text-sm mb-1.5">
+            Schedule <Text className="text-gray-500 text-xs">(Optional)</Text>
           </Text>
           <View className="flex-row gap-2 mb-3">
             {[
@@ -386,7 +409,7 @@ export default function AddHabitScreen({ navigation, route }) {
         {/* Date Range Toggle */}
         <View className="mb-8">
           <View className="flex-row justify-between items-center mb-2">
-            <Text className="text-gray-400 text-sm">Date Range</Text>
+            <Text className="text-gray-300 text-sm">Date Range</Text>
             <View className="flex-row bg-[#1a1d24] rounded-xl border border-white/10 overflow-hidden">
               <TouchableOpacity
                 onPress={() => setIsDaily(true)}

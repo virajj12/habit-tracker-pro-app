@@ -32,13 +32,13 @@ export async function requestPermissions() {
   }
 
   if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync('habit-reminders', {
+    await Notifications.setNotificationChannelAsync('habit-reminders-v2', {
       name: 'Habit Reminders',
       description: 'Daily reminders for your habits',
       importance: Notifications.AndroidImportance.HIGH,
-      vibrationPattern: [0, 1000, 500, 1000, 500, 1000],
+      vibrationPattern: [0, 1000, 500, 1000, 500, 1000, 100, 1000, 100, 1000],
       lightColor: '#ef4444',
-      sound: 'default',
+      sound: 'notificationSound.wav',
     });
   }
 
@@ -113,8 +113,9 @@ export async function scheduleHabitReminders(habits) {
           ? `It's time for "${habit.name}"! Keep your streak alive! 🔥`
           : `Good morning! Time to work on "${habit.name}". Keep your streak alive! 🔥`,
         data: { habitId: habit._id },
-        sound: 'default',
-        ...(Platform.OS === 'android' && { channelId: 'habit-reminders' }),
+        sound: 'notificationSound.wav',
+        vibrate: [0, 1000, 500, 1000, 500, 1000, 100, 1000, 100, 1000],
+        ...(Platform.OS === 'android' && { channelId: 'habit-reminders-v2' }),
       };
 
       if (skipDays.length === 0) {
